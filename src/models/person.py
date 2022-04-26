@@ -1,22 +1,17 @@
-from pydantic import BaseModel
+from models.base import ORJSONModel
 from typing import Optional
 
 
-class ShortPerson(BaseModel):
+class ShortPerson(ORJSONModel):
     id: str
     full_name: str
 
 
-class FullPerson(BaseModel):
+class FullPerson(ORJSONModel):
     id: str
     full_name: str
     roles: Optional[list]
     film_ids: Optional[list]
 
 
-class QueryPerson(BaseModel):
 
-    q: Optional[str]
-
-    def __hash__(self):
-        return hash((type(self),) + tuple(self.__dict__.values()))
