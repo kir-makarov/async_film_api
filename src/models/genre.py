@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from models.base import ORJSONModel
 
 
-class Genre(BaseModel):
+class Genre(ORJSONModel):
     id: str
     name: str
