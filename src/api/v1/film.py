@@ -6,6 +6,7 @@ from models.film import FullFilm, ShortFilm
 from fastapi_pagination import Page, paginate
 from typing import Optional
 from uuid import UUID
+from core.config import ERROR_CODE
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ async def search_films(
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='films not found'
+            detail=ERROR_CODE['fnf']
         )
     return paginate([
         ShortFilm(**film)
@@ -38,7 +39,7 @@ async def many_films(
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='films not found'
+            detail=ERROR_CODE['fnf']
         )
     return paginate([ShortFilm(**film) for film in films])
 
@@ -53,6 +54,6 @@ async def film_details(
     if not film:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='film not found'
+            detail=ERROR_CODE['fnf']
         )
     return FullFilm(**film)

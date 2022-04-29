@@ -5,6 +5,8 @@ from models.person import FullPerson, ShortPerson
 from models.base import QueryBase
 from fastapi_pagination import Page, paginate
 from models.film import ShortFilm
+from core.config import ERROR_CODE
+
 
 router = APIRouter()
 
@@ -18,7 +20,7 @@ async def search_persons(
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='persons not found'
+            detail=ERROR_CODE['pnf']
         )
     return paginate([
         ShortPerson(**person)
@@ -35,7 +37,7 @@ async def person_details(
     if not person:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='person not found'
+            detail=ERROR_CODE['pnf']
         )
     return FullPerson(**person)
 
@@ -49,7 +51,7 @@ async def fims_by_person(
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='persons not found'
+            detail=ERROR_CODE['pnf']
         )
     return paginate([
         ShortFilm(**film)
@@ -65,7 +67,7 @@ async def many_persons(
     if not persons:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='persons not found'
+            detail=ERROR_CODE['pnf']
         )
     return paginate([
         ShortPerson(**person)
