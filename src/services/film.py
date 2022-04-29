@@ -62,6 +62,8 @@ class FilmService(RedisService, ElasticService, QueryServise):
 
     async def search_films_by_query(self, request):
         full_query = self.get_full_query(request.url)
+        if not full_query:
+            return None
         key = f'{self.index}_search_{str(full_query.__hash__())}'
         data = await self.get_many_from_redis(key)
         if not data:
@@ -73,6 +75,8 @@ class FilmService(RedisService, ElasticService, QueryServise):
 
     async def get_many_films_by_query(self, request):
         full_query = self.get_full_query(request.url)
+        if not full_query:
+            return None
         key = f'{self.index}_{full_query.__hash__()}'
         data = await self.get_many_from_redis(key)
         if not data:

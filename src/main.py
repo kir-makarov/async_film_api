@@ -1,18 +1,21 @@
-import logging
 import aioredis
 import uvicorn as uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi_pagination import add_pagination
-from core import config
-from core.logger import LOGGING
+
 from db import elastic
 from db import redis
+from core.config import settings
 from routers.base import api
 
+import logging
+from core.logger import LOGGING
+
+
 app = FastAPI(
-    title=config.PROJECT_NAME,
+    title=settings.PROJECT_NAME,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
@@ -21,8 +24,10 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = aioredis.from_url("redis://redis")
-    elastic.es = AsyncElasticsearch(hosts=[f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}'])
+    redis.redis = aioredis.from_url(
+        f"redis://{settings.REDIS.HOST}:{settings.REDIS.PORT}")
+    elastic.es = AsyncElasticsearch(
+        hosts=[f'{settings.ELASTIC.HOST}:{settings.ELASTIC.PORT}'])
 
 
 @app.on_event('shutdown')
@@ -42,5 +47,4 @@ if __name__ == '__main__':
         port=8000,
         log_config=LOGGING,
         log_level=logging.DEBUG,
-        reload=True
     )

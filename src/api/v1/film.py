@@ -6,7 +6,9 @@ from models.film import FullFilm, ShortFilm
 from fastapi_pagination import Page, paginate
 from typing import Optional
 from uuid import UUID
-from core.config import ERROR_CODE
+from core.config import error
+
+
 
 router = APIRouter()
 
@@ -16,16 +18,22 @@ async def search_films(
         request: Request,
         film_service: FilmService = Depends(get_film_service),
 ) -> paginate:
-    films = await film_service.search_films_by_query(request)
-    if not films:
+    try:
+        films = await film_service.get_many_films_by_query(request)
+        if not films:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=error.not_film
+            )
+        return paginate([
+            ShortFilm(**film)
+            for film in films
+        ])
+    except Exception as err:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=ERROR_CODE['fnf']
+            detail=error.services_error
         )
-    return paginate([
-        ShortFilm(**film)
-        for film in films
-    ])
 
 
 @router.get('/', response_model=Page[ShortFilm])
@@ -35,13 +43,23 @@ async def many_films(
         filter: Optional[UUID] = Query(None, alias='filter[genre|person]'),
         film_service: FilmService = Depends(get_film_service),
 ) -> paginate:
-    films = await film_service.get_many_films_by_query(request)
-    if not films:
+
+    try:
+        films = await film_service.get_many_films_by_query(request)
+        if not films:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=error.not_film
+            )
+        return paginate([
+            ShortFilm(**film)
+            for film in films
+        ])
+    except Exception as err:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=ERROR_CODE['fnf']
+            detail=error.services_error
         )
-    return paginate([ShortFilm(**film) for film in films])
 
 
 @router.get('/{film_id}', response_model=FullFilm)
@@ -49,11 +67,17 @@ async def film_details(
         film_id: str,
         film_service: FilmService = Depends(get_film_service)
 ) -> FullFilm:
-    film = await film_service.get_film(film_id)
-    film = json.loads(film)
-    if not film:
+    try:
+        film = await film_service.get_film(film_id)
+        if not film:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=error.not_film
+            )
+        return FullFilm(**film)
+    except Exception:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=ERROR_CODE['fnf']
+            detail=error.services_error
         )
-    return FullFilm(**film)
+
