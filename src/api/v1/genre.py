@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from services.genre import GenreService, get_genre_service
 from models.genre import Genre
+from core.config import ERROR_CODE
 
 
 router = APIRouter()
@@ -17,7 +18,7 @@ async def genre_details(
     if not genre:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='genre not found'
+            detail=ERROR_CODE['gnf']
         )
     return genre
 
@@ -30,6 +31,6 @@ async def genre(
     if not genres:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='genre not found'
+            detail=ERROR_CODE['gnf']
         )
     return genres

@@ -1,7 +1,8 @@
 import os
 from logging import config as logging_config
+from pydantic import BaseSettings
 
-from src.core.logger import LOGGING
+from logger import LOGGING
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
@@ -19,3 +20,6 @@ ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ERROR_CODE = {'fnf': 'films not found', 'gnf': 'genre not found', 'pnf': 'person not found'}
+
