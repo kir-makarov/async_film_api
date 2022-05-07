@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
 
-############# Generals #############
+############# Redis #############
   redis:
     image: redis:6.2.6
     container_name: redis
@@ -30,7 +30,7 @@ services:
     networks:
       - backend
 
-############# asymc_api #############
+############# async_api #############
   api:
     build:
       context: ./async_api/src

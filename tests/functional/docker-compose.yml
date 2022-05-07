@@ -1,0 +1,47 @@
+version: '3'
+services:
+  es:
+    image: 'elasticsearch:7.17.1'
+    env_file:
+      - 'elasticsearch.env'
+    ports:
+      - "9200:9200"
+    expose:
+      - 9200
+
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  api:
+    build: ../../.
+    image: fastapi-image
+    env_file:
+      - ./src/.env
+    volumes:
+      - .data_api:/data/
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    depends_on:
+      - es
+      - redis
+
+#  tests:
+#    image: fastapi-image
+#    entrypoint: >
+#      sh -c "pip install -r /tests/functional/requirements.txt
+#      && python3 /tests/functional/utils/wait_for_es.py
+#      && python3 /tests/functional/utils/wait_for_redis.py
+#      && pytest /tests/functional/src"
+#    depends_on:
+#      - api
+
