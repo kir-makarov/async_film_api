@@ -33,9 +33,11 @@ services:
 ############# async_api #############
   api:
     build:
-      context: ./async_api/src
+      context: ./src
       dockerfile: Dockerfile
     container_name: api
+    ports:
+      - "8000:8000"
     networks:
       - backend
     env_file:
