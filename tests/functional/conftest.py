@@ -107,6 +107,7 @@ async def setup(es_client, fill_index):
 async def redis_client():
     redis = aioredis.from_url("redis://redis:6379")
     yield redis
+    await redis.flushall()
 
 
 @pytest.fixture(scope='session')
