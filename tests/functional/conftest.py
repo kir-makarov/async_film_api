@@ -10,9 +10,9 @@ from typing import Optional
 from dataclasses import dataclass
 
 import pytest_asyncio
-from elasticsearch.helpers import bulk
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
+from elasticsearch.helpers import async_bulk
 
 SERVICE_URL = 'http://127.0.0.1:8000'
 
@@ -38,8 +38,8 @@ def predefined_data_generator():
     def inner():
         for filename in (
             "../testdata/movies.json",
-            "../testdata/persons.json",
-            "../testdata/genres.json",
+            "../testdata/person.json",
+            "../testdata/genre.json",
         ):
             yield json.load(open(filename))
 
@@ -86,8 +86,8 @@ async def create_indices(indices_data_generator, es_client):
 @pytest_asyncio.fixture(scope="session")
 async def fill_index(es_client, create_indices, predefined_data_generator):
     for data in predefined_data_generator():
-        # await async_bulk(es_client, data)
-        bulk(es_client, data)
+        await async_bulk(es_client, data)
+        # bulk(es_client, data)
     while True:
         response = await es_client.search(
             index="movies",
@@ -107,7 +107,7 @@ async def setup(es_client, redis_client, fill_index):
 
 @pytest.fixture(scope='function')
 async def redis_client():
-    redis = await aioredis.create_redis_pool(('127.0.0.1', 6379), minsize=10, maxsize=20)
+    redis = aioredis.from_url('redis://127.0.0.1:6379')
     yield redis
 
 

@@ -10,7 +10,7 @@ class RedisSettings(BaseSettings):
 
 
 class ElasticSettings(BaseSettings):
-    HOST: str = os.getenv('ELASTIC_HOST', '127.0.0.1')
+    HOST: str = os.getenv('ELASTIC_HOST', 'http://127.0.0.1')
     PORT: int = os.getenv('ELASTIC_PORT', 9200)
 
 

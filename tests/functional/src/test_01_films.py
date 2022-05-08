@@ -7,7 +7,7 @@ async def test_search_detailed(setup, redis_client, make_get_request):
     # await es_client.bulk(...)
 
     # Выполнение запроса
-    response = await make_get_request('/films/search', {'search': 'Star Wars'})
+    response = await make_get_request('/films', {'page': 1, 'size': 50})
 
     # Проверка результата
     assert response.status == 404
