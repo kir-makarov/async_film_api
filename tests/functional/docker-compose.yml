@@ -10,7 +10,7 @@ services:
       - 9200
 
   redis:
-    image: 'redis:alpine'
+    image: redis:6.2.6
     ports:
       - "6379:6379"
     expose:
@@ -35,13 +35,19 @@ services:
       - es
       - redis
 
-#  tests:
-#    image: fastapi-image
-#    entrypoint: >
-#      sh -c "pip install -r /tests/functional/requirements.txt
-#      && python3 /tests/functional/utils/wait_for_es.py
-#      && python3 /tests/functional/utils/wait_for_redis.py
-#      && pytest /tests/functional/src"
-#    depends_on:
-#      - api
+  tests:
+    image: fastapi-image
+    volumes:
+      - ./requirements.txt:/tests/requirements.txt
+      - ./conftest.py:/tests/conftest.py
+      - ./utils:/tests/utils/
+      - ./src:/tests/src/
+      - ./testdata:/tests/testdata
+    entrypoint: >
+      sh -c "pip install -r /tests/requirements.txt
+      && python3 /tests/utils/wait_for_es.py
+      && python3 /tests/utils/wait_for_redis.py
+      && pytest /tests/src"
+    depends_on:
+      - api
 

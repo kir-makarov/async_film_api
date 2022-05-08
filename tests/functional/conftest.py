@@ -14,7 +14,7 @@ from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
-SERVICE_URL = 'http://127.0.0.1:8000'
+SERVICE_URL = 'http://api:8000'
 
 
 @dataclass
@@ -23,23 +23,26 @@ class HTTPResponse:
     headers: CIMultiDictProxy[str]
     status: int
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     return asyncio.get_event_loop()
 
+
 @pytest.fixture(scope='session')
 async def es_client():
-    client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
+    client = AsyncElasticsearch(hosts='http://es:9200')
     yield client
     await client.close()
+
 
 @pytest.fixture(scope="session")
 def predefined_data_generator():
     def inner():
         for filename in (
-            "../testdata/movies.json",
-            "../testdata/person.json",
-            "../testdata/genre.json",
+                "/tests/testdata/movies.json",
+                "/tests/testdata/person.json",
+                "/tests/testdata/genre.json",
         ):
             yield json.load(open(filename))
 
@@ -50,13 +53,14 @@ def predefined_data_generator():
 def indices_data_generator():
     def inner():
         for index_name, filename in (
-            ("movies", "../testdata/index_films.json"),
-            ("persons", "../testdata/index_person.json"),
-            ("genres", "../testdata/index_genre.json"),
+                ("movies", "/tests/testdata/index_films.json"),
+                ("persons", "/tests/testdata/index_person.json"),
+                ("genres", "/tests/testdata/index_genre.json"),
         ):
             yield index_name, json.load(open(filename))
 
     return inner
+
 
 @pytest_asyncio.fixture(scope="session")
 async def create_indices(indices_data_generator, es_client):
@@ -64,16 +68,10 @@ async def create_indices(indices_data_generator, es_client):
     for index_name, schema in indices_data_generator():
         indices_names.append(index_name)
         index_exists = await es_client.indices.exists(index=index_name)
-        # if not index_exists:
-        #     await es_client.options(
-        #         ignore_status=HTTPStatus.BAD_REQUEST
-        #     ).indices.create(
-        #         index=index_name,
-        #         mappings=schema["mappings"],
-        #         settings=schema["settings"],
-        #     )
         if not index_exists:
-            await es_client.indices.create(
+            await es_client.options(
+                ignore_status=HTTPStatus.BAD_REQUEST
+            ).indices.create(
                 index=index_name,
                 mappings=schema["mappings"],
                 settings=schema["settings"],
@@ -87,10 +85,9 @@ async def create_indices(indices_data_generator, es_client):
 async def fill_index(es_client, create_indices, predefined_data_generator):
     for data in predefined_data_generator():
         await async_bulk(es_client, data)
-        # bulk(es_client, data)
     while True:
         response = await es_client.search(
-            index="movies",
+            index="genre",
             query={"match_all": {}},
             size=20,
         )
@@ -102,12 +99,13 @@ async def fill_index(es_client, create_indices, predefined_data_generator):
 
 
 @pytest_asyncio.fixture
-async def setup(es_client, redis_client, fill_index):
+async def setup(es_client, fill_index):
     pass
+
 
 @pytest.fixture(scope='function')
 async def redis_client():
-    redis = aioredis.from_url('redis://127.0.0.1:6379')
+    redis = aioredis.from_url("redis://redis:6379")
     yield redis
 
 
@@ -122,7 +120,7 @@ async def session():
 def make_get_request(session):
     async def inner(method: str, params: Optional[dict] = None) -> HTTPResponse:
         params = params or {}
-        url = SERVICE_URL + '/api/v1' + method  # в боевых системах старайтесь так не делать!
+        url = SERVICE_URL + '/api/v1' + method
         async with session.get(url, params=params) as response:
             return HTTPResponse(
                 body=await response.json(),

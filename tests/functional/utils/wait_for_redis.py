@@ -9,14 +9,14 @@ async def main():
         redis = None
 
         try:
-            redis = await aioredis.create_redis_pool(('127.0.0.1', 6379), minsize=10, maxsize=20)
+            redis =  aioredis.from_url("redis://redis:6379")
             pong = await redis.ping()
         except Exception:
             print("Redis is down")
 
-        if pong:
+        if pong and redis:
             print("Redis is up!")
-            redis.close()
+            await redis.close()
             break
 
         await asyncio.sleep(1)
