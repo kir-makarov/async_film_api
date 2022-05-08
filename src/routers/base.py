@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter
 from api.v1 import film, genre, person
 
 api = APIRouter()

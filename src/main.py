@@ -4,19 +4,18 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi_pagination import add_pagination
-
 from db import elastic
 from db import redis
+import logging
+from core.logger import LOGGING
 from core.config import settings
 from routers.base import api
 
-import logging
-from core.logger import LOGGING
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    docs_url='/api/openapi',
+    docs_url='/api/docs',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
 )
@@ -24,10 +23,8 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = aioredis.from_url(
-        f"redis://{settings.REDIS.HOST}:{settings.REDIS.PORT}")
-    elastic.es = AsyncElasticsearch(
-        hosts=[f'{settings.ELASTIC.HOST}:{settings.ELASTIC.PORT}'])
+    elastic.es = AsyncElasticsearch(hosts=[f'{settings.elastic.host}:{settings.elastic.port}'])
+    redis.redis = aioredis.from_url(f"redis://{settings.redis.host}:{settings.redis.port}")
 
 
 @app.on_event('shutdown')
@@ -37,7 +34,6 @@ async def shutdown():
 
 
 app.include_router(api, prefix="/api")
-
 add_pagination(app)
 
 if __name__ == '__main__':
@@ -47,4 +43,5 @@ if __name__ == '__main__':
         port=8000,
         log_config=LOGGING,
         log_level=logging.DEBUG,
+        reload=True
     )
