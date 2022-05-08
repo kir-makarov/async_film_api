@@ -33,7 +33,7 @@ services:
 ############# async_api #############
   api:
     build:
-      context: ./src
+      context: .
       dockerfile: Dockerfile
     container_name: api
     ports:

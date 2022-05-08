@@ -10,7 +10,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 import pytest_asyncio
-from elasticsearch._async.helpers import async_bulk
+from elasticsearch.helpers import bulk
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 
@@ -23,10 +23,13 @@ class HTTPResponse:
     headers: CIMultiDictProxy[str]
     status: int
 
+@pytest.fixture(scope="session")
+def event_loop():
+    return asyncio.get_event_loop()
 
-@pytest_asyncio.fixture(scope='session')
+@pytest.fixture(scope='session')
 async def es_client():
-    client = AsyncElasticsearch(hosts='https://127.0.0.1:9200')
+    client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
     yield client
     await client.close()
 
@@ -34,9 +37,9 @@ async def es_client():
 def predefined_data_generator():
     def inner():
         for filename in (
-            "testdata/movies.json",
-            "testdata/persons.json",
-            "testdata/genres.json",
+            "../testdata/movies.json",
+            "../testdata/persons.json",
+            "../testdata/genres.json",
         ):
             yield json.load(open(filename))
 
@@ -47,9 +50,9 @@ def predefined_data_generator():
 def indices_data_generator():
     def inner():
         for index_name, filename in (
-            ("movies", "testdata/index_films.json"),
-            ("persons", "testdata/index_person.json"),
-            ("genres", "testdata/index_genre.json"),
+            ("movies", "../testdata/index_films.json"),
+            ("persons", "../testdata/index_person.json"),
+            ("genres", "../testdata/index_genre.json"),
         ):
             yield index_name, json.load(open(filename))
 
@@ -61,10 +64,16 @@ async def create_indices(indices_data_generator, es_client):
     for index_name, schema in indices_data_generator():
         indices_names.append(index_name)
         index_exists = await es_client.indices.exists(index=index_name)
+        # if not index_exists:
+        #     await es_client.options(
+        #         ignore_status=HTTPStatus.BAD_REQUEST
+        #     ).indices.create(
+        #         index=index_name,
+        #         mappings=schema["mappings"],
+        #         settings=schema["settings"],
+        #     )
         if not index_exists:
-            await es_client.options(
-                ignore_status=HTTPStatus.BAD_REQUEST
-            ).indices.create(
+            await es_client.indices.create(
                 index=index_name,
                 mappings=schema["mappings"],
                 settings=schema["settings"],
@@ -77,17 +86,18 @@ async def create_indices(indices_data_generator, es_client):
 @pytest_asyncio.fixture(scope="session")
 async def fill_index(es_client, create_indices, predefined_data_generator):
     for data in predefined_data_generator():
-        await async_bulk(es_client, data)
+        # await async_bulk(es_client, data)
+        bulk(es_client, data)
     while True:
         response = await es_client.search(
             index="movies",
             query={"match_all": {}},
             size=20,
         )
-        if response["hits"]["hits"]:
+        if response.get("hits", {}).get("hits", {}):
             break
         else:
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(0.2)
             continue
 
 
