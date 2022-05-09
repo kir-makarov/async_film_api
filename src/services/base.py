@@ -8,6 +8,7 @@ from core.config import settings
 import json
 from typing import Union
 
+
 class BaseService:
 
     def __init__(self, elastic: AsyncElasticsearch, redis: Redis):

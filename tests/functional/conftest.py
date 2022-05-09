@@ -14,6 +14,7 @@ from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
+# SERVICE_URL = 'http://127.0.0.1:8000'
 SERVICE_URL = 'http://api:8000'
 
 
@@ -31,6 +32,7 @@ def event_loop():
 
 @pytest.fixture(scope='session')
 async def es_client():
+#    client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
     client = AsyncElasticsearch(hosts='http://es:9200')
     yield client
     await client.close()
@@ -40,6 +42,9 @@ async def es_client():
 def predefined_data_generator():
     def inner():
         for filename in (
+                # "../testdata/movies.json",
+                # "../testdata/person.json",
+                # "../testdata/genre.json",
                 "/tests/testdata/movies.json",
                 "/tests/testdata/person.json",
                 "/tests/testdata/genre.json",
@@ -53,9 +58,12 @@ def predefined_data_generator():
 def indices_data_generator():
     def inner():
         for index_name, filename in (
+                # ("movies", "../testdata/index_films.json"),
+                # ("person", "../testdata/index_person.json"),
+                # ("genre", "../testdata/index_genre.json"),
                 ("movies", "/tests/testdata/index_films.json"),
-                ("persons", "/tests/testdata/index_person.json"),
-                ("genres", "/tests/testdata/index_genre.json"),
+                ("person", "/tests/testdata/index_person.json"),
+                ("genre", "/tests/testdata/index_genre.json"),
         ):
             yield index_name, json.load(open(filename))
 
@@ -68,14 +76,13 @@ async def create_indices(indices_data_generator, es_client):
     for index_name, schema in indices_data_generator():
         indices_names.append(index_name)
         index_exists = await es_client.indices.exists(index=index_name)
-        if not index_exists:
-            await es_client.options(
-                ignore_status=HTTPStatus.BAD_REQUEST
-            ).indices.create(
-                index=index_name,
-                mappings=schema["mappings"],
-                settings=schema["settings"],
-            )
+        if index_exists:
+            await es_client.indices.delete(index=index_name)
+        await es_client.indices.create(
+            index=index_name,
+            mappings=schema["mappings"],
+            settings=schema["settings"],
+        )
     yield
     for index_name in indices_names:
         await es_client.indices.delete(index=index_name)
@@ -87,7 +94,7 @@ async def fill_index(es_client, create_indices, predefined_data_generator):
         await async_bulk(es_client, data)
     while True:
         response = await es_client.search(
-            index="genre",
+            index="movies",
             query={"match_all": {}},
             size=20,
         )
@@ -105,7 +112,8 @@ async def setup(es_client, fill_index):
 
 @pytest.fixture(scope='function')
 async def redis_client():
-    redis = aioredis.from_url("redis://redis:6379")
+#    redis = aioredis.from_url("redis://redis:6379")
+    redis = aioredis.from_url("redis://127.0.0.1:6379")
     yield redis
     await redis.flushall()
 
