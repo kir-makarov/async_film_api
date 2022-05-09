@@ -8,11 +8,16 @@ class Filter(BaseModel):
     value: Optional[str]
 
 
+class Page(BaseModel):
+    number: int = 1
+    size: int = 50
+
 class QueryBase(BaseModel):
 
     query: Optional[str]
     sort: Optional[str]
     filter: Optional[dict]
+    page: Optional[Page] = Page()
     total: Optional[str] = 10000
 
     @validator('filter')

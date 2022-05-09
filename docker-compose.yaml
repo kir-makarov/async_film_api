@@ -30,20 +30,20 @@ services:
     networks:
       - backend
 
-############# async_api #############
-#  api:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    container_name: api
-#    ports:
-#      - "8000:8000"
-#    networks:
-#      - backend
-#    env_file:
-#      - .env
-#    depends_on:
-#      - redis
+############ async_api #############
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+    env_file:
+      - .env
+    depends_on:
+      - redis
 
 volumes:
   static_volume:
