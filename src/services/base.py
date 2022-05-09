@@ -51,8 +51,9 @@ class ElasticQueryMaker:
             body.setdefault('query', {}).update(self.get_nested_filter(query))
         if query.sort:
             body['sort'] = self.get_sort(query)
-        if query.total:
-            body['size'] = query.total
+        if query.page:
+            body['from'] = (query.page.number - 1) * query.page.size
+            body['size'] = query.page.size
         return body
 
     def key_body(self, index: str, key: Union[dict, str]):
@@ -70,7 +71,7 @@ class ElasticService(BaseService, ElasticQueryMaker):
     @backoff.on_exception(backoff.expo, ConnectionError, max_time=10)
     async def get_by_id_from_elastic(self, index: str, _id: str):
         try:
-            doc = await self.elastic.get(index, _id)
+            doc = await self.elastic.get(index=index, id=_id)
             return doc['_source']
         except NotFoundError:
             return None

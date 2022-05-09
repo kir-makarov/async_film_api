@@ -5,26 +5,26 @@ from models.person import FullPerson, ShortPerson
 from fastapi_pagination import Page, paginate
 from utils.get_param import get_params
 from core.config import error
-from typing import Optional
+from typing import Optional, List
 
 
 router = APIRouter()
 
 
-@router.get('/', response_model=Page[ShortPerson])
-@router.get('/search', response_model=Page[ShortPerson])
+@router.get('/', response_model=List[ShortPerson])
+@router.get('/search', response_model=List[ShortPerson])
 async def many_persons(
         request: Request,
         person_service: PersonService = Depends(get_person_service),
-) -> paginate:
+) -> List[ShortPerson]:
     params = get_params(request)
     person_list = await person_service.get_by_query(params)
     if not person_list:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=error.not_person)
-    return paginate([
+    return [
         ShortPerson(**person)
         for person in person_list
-    ])
+    ]
 
 
 @router.get('/{person_id}', response_model=Optional[FullPerson])
