@@ -47,16 +47,30 @@
       },
       "full_name": {
         "type": "text",
-        "analyzer": "ru_en"
+        "analyzer": "ru_en",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
-      "actor": {
-        "type": "text"
+      "roles": {
+        "type": "text",
+        "analyzer": "ru_en",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
-      "writer": {
-        "type": "text"
-      },
-      "director": {
-        "type": "text"
+      "film_ids": {
+        "type": "text",
+        "analyzer": "ru_en",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       }
     }
   }
