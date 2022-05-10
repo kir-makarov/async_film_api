@@ -6,7 +6,6 @@ from core.config import settings
 import asyncio
 
 
-
 @backoff.on_exception(backoff.expo, exceptions.ConnectionError, logger=logger)
 async def create_index(es: AsyncElasticsearch, index: str, schema: dict) -> None:
     res = await es.indices.create(
@@ -35,4 +34,3 @@ async def run():
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run())
-
