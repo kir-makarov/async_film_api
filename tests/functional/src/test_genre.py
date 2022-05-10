@@ -18,7 +18,7 @@ async def test_genre_full_list(setup, redis_client, make_get_request):
     assert response.status == 200
 
 @pytest.mark.asyncio
-async def test_genre_by_id_cache(setup, redis_client, make_get_request):
+async def test_genre_by_cache(setup, redis_client, make_get_request):
     begin_response = await redis_client.get('{"page": {"number": "1", "size": "10"}, "index": "genre"}')
     await make_get_request("/genres", {"page[number]": 1, "page[size]": 10})
     redis_response = await redis_client.get('{"page": {"number": "1", "size": "10"}, "index": "genre"}')
