@@ -14,8 +14,8 @@ from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
-# SERVICE_URL = 'http://127.0.0.1:8000'
-SERVICE_URL = 'http://api:8000'
+SERVICE_URL = 'http://127.0.0.1:8000'
+#SERVICE_URL = 'http://api:8000'
 
 
 @dataclass
@@ -32,8 +32,8 @@ def event_loop():
 
 @pytest.fixture(scope='session')
 async def es_client():
-#    client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
-    client = AsyncElasticsearch(hosts='http://es:9200')
+    client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
+ #   client = AsyncElasticsearch(hosts='http://es:9200')
     yield client
     await client.close()
 
@@ -45,9 +45,9 @@ def predefined_data_generator():
                 # "../testdata/movies.json",
                 # "../testdata/person.json",
                 # "../testdata/genre.json",
-                "/tests/testdata/movies.json",
-                "/tests/testdata/person.json",
-                "/tests/testdata/genre.json",
+                "tests/functional/testdata/movies.json",
+                "tests/functional/testdata/person.json",
+                "tests/functional/testdata/genre.json",
         ):
             yield json.load(open(filename))
 
@@ -61,9 +61,9 @@ def indices_data_generator():
                 # ("movies", "../testdata/index_films.json"),
                 # ("person", "../testdata/index_person.json"),
                 # ("genre", "../testdata/index_genre.json"),
-                ("movies", "/tests/testdata/index_films.json"),
-                ("person", "/tests/testdata/index_person.json"),
-                ("genre", "/tests/testdata/index_genre.json"),
+                ("movies", "tests/functional/testdata/index_films.json"),
+                ("person", "tests/functional/testdata/index_person.json"),
+                ("genre", "tests/functional/testdata/index_genre.json"),
         ):
             yield index_name, json.load(open(filename))
 
@@ -74,6 +74,7 @@ def indices_data_generator():
 async def create_indices(indices_data_generator, es_client):
     indices_names = []
     for index_name, schema in indices_data_generator():
+        print(index_name, schema)
         indices_names.append(index_name)
         index_exists = await es_client.indices.exists(index=index_name)
         if index_exists:
@@ -101,7 +102,7 @@ async def fill_index(es_client, create_indices, predefined_data_generator):
         if response.get("hits", {}).get("hits", {}):
             break
         else:
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(2)
             continue
 
 
@@ -130,6 +131,7 @@ def make_get_request(session):
     async def inner(method: str, params: Optional[dict] = None) -> HTTPResponse:
         params = params or {}
         url = SERVICE_URL + '/api/v1' + method
+        print(url)
         async with session.get(url, params=params) as response:
             return HTTPResponse(
                 body=await response.json(),

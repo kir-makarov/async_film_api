@@ -11,8 +11,6 @@ from core.logger import LOGGING
 from core.config import settings
 from routers.base import api
 
-
-
 app = FastAPI(
     title=settings.PROJECT_NAME,
     docs_url='/api/docs',

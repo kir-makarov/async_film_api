@@ -46,8 +46,9 @@
         "type": "keyword"
       },
       "name": {
-        "type": "text",
-        "analyzer": "ru_en"
+                "type": "text",
+                "analyzer": "ru_en",
+                "fields": {"raw": {"type": "keyword"}}
       }
     }
   }
