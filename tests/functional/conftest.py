@@ -14,8 +14,8 @@ from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
-SERVICE_URL = 'http://127.0.0.1:8000'
-#SERVICE_URL = 'http://api:8000'
+# SERVICE_URL = 'http://127.0.0.1:8000'
+SERVICE_URL = 'http://api:8000'
 
 
 @dataclass
@@ -32,8 +32,8 @@ def event_loop():
 
 @pytest.fixture(scope='session')
 async def es_client():
-    client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
- #   client = AsyncElasticsearch(hosts='http://es:9200')
+    # client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
+    client = AsyncElasticsearch(hosts='http://es:9200')
     yield client
     await client.close()
 
@@ -113,8 +113,8 @@ async def setup(es_client, fill_index):
 
 @pytest.fixture(scope='function')
 async def redis_client():
-#    redis = aioredis.from_url("redis://redis:6379")
-    redis = aioredis.from_url("redis://127.0.0.1:6379")
+    redis = aioredis.from_url("redis://redis:6379")
+    # redis = aioredis.from_url("redis://127.0.0.1:6379")
     yield redis
     await redis.flushall()
 
