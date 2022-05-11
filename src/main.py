@@ -21,8 +21,7 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    # elastic.es = AsyncElasticsearch(hosts=[f'http://{settings.elastic.host}:{settings.elastic.port}'])
-    elastic.es = AsyncElasticsearch(hosts=['http://es:9200'])
+    elastic.es = AsyncElasticsearch(hosts=[f'http://{settings.elastic.host}:{settings.elastic.port}'])
     redis.redis = aioredis.from_url(f"redis://{settings.redis.host}:{settings.redis.port}")
 
 

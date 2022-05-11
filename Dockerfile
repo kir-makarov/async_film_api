@@ -9,7 +9,7 @@ COPY src/requirements.txt .
 RUN pip install -r requirements.txt
 
 ENV HOME=/src
-RUN mkdir $HOME
+
 WORKDIR $HOME
 
 COPY src $HOME
