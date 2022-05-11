@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from http import HTTPStatus
 
 import aiohttp
@@ -8,14 +9,16 @@ import aioredis
 
 from typing import Optional
 from dataclasses import dataclass
+from dotenv import load_dotenv
 
 import pytest_asyncio
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
-# SERVICE_URL = 'http://127.0.0.1:8000'
-SERVICE_URL = 'http://api:8000'
+load_dotenv()
+
+SERVICE_URL = os.getenv('API_URL')
 
 
 @dataclass
@@ -32,8 +35,7 @@ def event_loop():
 
 @pytest.fixture(scope='session')
 async def es_client():
-    # client = AsyncElasticsearch(hosts='http://127.0.0.1:9200')
-    client = AsyncElasticsearch(hosts='http://es:9200')
+    client = AsyncElasticsearch(hosts=os.getenv('ES_URL'))
     yield client
     await client.close()
 
@@ -42,9 +44,6 @@ async def es_client():
 def predefined_data_generator():
     def inner():
         for filename in (
-                # "../testdata/movies.json",
-                # "../testdata/person.json",
-                # "../testdata/genre.json",
                 "/tests/testdata/movies.json",
                 "/tests/testdata/person.json",
                 "/tests/testdata/genre.json",
@@ -58,9 +57,6 @@ def predefined_data_generator():
 def indices_data_generator():
     def inner():
         for index_name, filename in (
-                # ("movies", "../testdata/index_films.json"),
-                # ("person", "../testdata/index_person.json"),
-                # ("genre", "../testdata/index_genre.json"),
                 ("movies", "/tests/testdata/index_films.json"),
                 ("person", "/tests/testdata/index_person.json"),
                 ("genre", "/tests/testdata/index_genre.json"),
@@ -113,8 +109,7 @@ async def setup(es_client, fill_index):
 
 @pytest.fixture(scope='function')
 async def redis_client():
-    redis = aioredis.from_url("redis://redis:6379")
-    # redis = aioredis.from_url("redis://127.0.0.1:6379")
+    redis = aioredis.from_url(os.getenv('REDIS_URL'))
     yield redis
     await redis.flushall()
     await redis.close()
