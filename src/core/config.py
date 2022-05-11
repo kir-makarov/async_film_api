@@ -10,7 +10,7 @@ class Base(BaseSettings):
         arbitrary_types_allowed = True
 
 class RedisSettings(Base):
-    host: str = os.getenv('REDIS_HOST', '127.0.0.1')
+    host: str = os.getenv('REDIS_HOST', 'redis')
     port: str = os.getenv('REDIS_PORT', 6379)
     TTL: int = 60 * 5
 
@@ -25,7 +25,7 @@ class ElasticSchema(Base):
 
 class ElasticSettings(Base):
 
-    host: str = os.getenv('ELASTIC_HOST', 'http://127.0.0.1')
+    host: str = os.getenv('ELASTIC_HOST', 'es')
     port: int = os.getenv('ELASTIC_PORT', 9200)
     es_schema: ElasticSchema = ElasticSchema()
 
