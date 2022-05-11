@@ -37,6 +37,8 @@ services:
 
   tests:
     image: fastapi-image
+    env_file:
+      - ./src/.env
     volumes:
       - ./requirements.txt:/tests/requirements.txt
       - ./conftest.py:/tests/conftest.py

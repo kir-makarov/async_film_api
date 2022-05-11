@@ -37,10 +37,8 @@ class ElasticQueryMaker:
 
     def get_sort(self, query) -> dict:
         field = query.sort
-        direction = 'desc'
-        if '-' in field:
-            direction = 'asc'
-            field = field.replace('-', '')
+        direction = 'desc' if field.startwith("-") else "asc"
+        field = field.removeprefix("-")
         return {field: {'order': direction}}
 
     def es_body(self, params):
