@@ -2,8 +2,11 @@ import asyncio
 
 import aioredis
 
+WAIT_UNTIL_TIMEOUT = 15
 
 async def main():
+    attempt = 0
+
     while True:
         pong = None
         redis = None
@@ -17,6 +20,11 @@ async def main():
         if pong and redis:
             print("Redis is up!")
             await redis.close()
+            break
+
+        attempt += 1
+        if attempt >= WAIT_UNTIL_TIMEOUT:
+            print("Redis timeout")
             break
 
         await asyncio.sleep(1)

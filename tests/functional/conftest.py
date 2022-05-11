@@ -45,9 +45,9 @@ def predefined_data_generator():
                 # "../testdata/movies.json",
                 # "../testdata/person.json",
                 # "../testdata/genre.json",
-                "tests/functional/testdata/movies.json",
-                "tests/functional/testdata/person.json",
-                "tests/functional/testdata/genre.json",
+                "/tests/testdata/movies.json",
+                "/tests/testdata/person.json",
+                "/tests/testdata/genre.json",
         ):
             yield json.load(open(filename))
 
@@ -61,9 +61,9 @@ def indices_data_generator():
                 # ("movies", "../testdata/index_films.json"),
                 # ("person", "../testdata/index_person.json"),
                 # ("genre", "../testdata/index_genre.json"),
-                ("movies", "tests/functional/testdata/index_films.json"),
-                ("person", "tests/functional/testdata/index_person.json"),
-                ("genre", "tests/functional/testdata/index_genre.json"),
+                ("movies", "/tests/testdata/index_films.json"),
+                ("person", "/tests/testdata/index_person.json"),
+                ("genre", "/tests/testdata/index_genre.json"),
         ):
             yield index_name, json.load(open(filename))
 
@@ -117,6 +117,7 @@ async def redis_client():
     # redis = aioredis.from_url("redis://127.0.0.1:6379")
     yield redis
     await redis.flushall()
+    await redis.close()
 
 
 @pytest.fixture(scope='session')
