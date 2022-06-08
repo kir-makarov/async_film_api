@@ -48,11 +48,10 @@ def authenticate_user(func):
 async def many_films(
         request: Request,
         film_service: FilmService = Depends(get_film_service),
-        **kwargs) -> List[ShortFilm]:
+        role: str = const.ACCESS_GUEST) -> List[ShortFilm]:
     params = get_params(request)
     film_list = await film_service.get_by_query(params=params)
 
-    role = kwargs["role"]
     if role == const.ACCESS_GUEST:
         film_list = [film for film in film_list if film.get("imdb_rating") and film.get("imdb_rating") <= 8]
 
