@@ -16,6 +16,7 @@ from utils.get_param import get_params
 
 router = APIRouter()
 
+
 def authenticate_user(func):
     @wraps(func)
     async def wrapper(*args, request: Request, **kwargs):
@@ -32,12 +33,14 @@ def authenticate_user(func):
                     verified = content_json.get("verified")
                     if verified:
                         result_role = content_json.get("role", const.ACCESS_GUEST)
-        except ClientConnectionError: # in case of /auth service unavailable
+        except ClientConnectionError:  # in case of /auth service unavailable
             result_role = const.ACCESS_GUEST
 
         kwargs['role'] = result_role
         return await func(*args, request, **kwargs)
+
     return wrapper
+
 
 @router.get('/', response_model=List[ShortFilm])
 @router.get('/search', response_model=List[ShortFilm])
@@ -45,9 +48,14 @@ def authenticate_user(func):
 async def many_films(
         request: Request,
         film_service: FilmService = Depends(get_film_service),
-) -> List[ShortFilm]:
+        **kwargs) -> List[ShortFilm]:
     params = get_params(request)
     film_list = await film_service.get_by_query(params=params)
+
+    role = kwargs["role"]
+    if role == const.ACCESS_GUEST:
+        film_list = [film for film in film_list if film.get("imdb_rating") and film.get("imdb_rating") <= 8]
+
     if not film_list:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=error.not_film)
     return [
